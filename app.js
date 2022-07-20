@@ -9,13 +9,13 @@ var usersRouter = require("./routes/users");
 var authRouter = require("./routes/auth");
 
 var app = express();
+
+var { mongoConnect } = require("./mongo.js");
+mongoConnect();
 //enable cors
 const cors = require("cors");
 app.use(cors());
 app.options("*", cors());
-
-var { mongoConnect } = require("./mongo.js");
-mongoConnect();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
