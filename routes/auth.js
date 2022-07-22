@@ -54,7 +54,9 @@ router.post("/login-user", async function (req, res, next) {
       const data = {
         time: new Date(),
         userId: user.uid,
+        scope: user.username.includes("codeimmersives.com") ? "admin" : "user",
       };
+
       const token = jwt.sign(data, jwtSecretKey);
 
       res.status(200).json({ success: true, token });
@@ -66,22 +68,27 @@ router.post("/login-user", async function (req, res, next) {
   }
 });
 
-router.get("/validate-token", async function (req, res, next) {
+router.get("/validate-token", function (req, res) {
   const tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
 
   try {
     const token = req.header(tokenHeaderKey);
-
     const verified = jwt.verify(token, jwtSecretKey);
-    if (verified) {
-      return res.json({ success: true });
-    } else {
-      // Access Denied
-      throw Error("Access Denied");
+
+    if (verified && verified.scope === "admin") {
+      return res.json({
+        success: true,
+        message: "Speak 'Friend' and enter...",
+      });
     }
+    if (verified && verified.scope === "user") {
+      return res.json({ success: true, message: "You shall not pass!" });
+    }
+
+    // Else Access Denied
+    throw Error("Access Denied");
   } catch (error) {
-    // Access Denied
     return res.status(401).json({ success: true, message: String(error) });
   }
 });
